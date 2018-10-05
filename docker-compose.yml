@@ -1,0 +1,23 @@
+version: '3'
+services:
+  browser-automation:
+    build: .
+    image: dash-browser-automation:0.1.0
+    ports:
+      - "8080:8080"
+    networks:
+      - dash-net
+    depends_on:
+      - chrome
+    
+  chrome:
+    image: "selenium/standalone-chrome"
+    ports:
+      - "4444:4444"
+    networks:
+      - dash-net
+
+networks:
+  dash-net:
+    external: true
+
