@@ -3,7 +3,6 @@ package marist;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
-import marist.AutomationService.AutomationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,10 +18,11 @@ public class Endpoint {
   private final Logger logger = LoggerFactory.getLogger(Endpoint.class);
 
   @RequestMapping(method = RequestMethod.POST, value = "/")
-  public AutomationResponse getDegreeWorksText(@RequestParam String username,
+  public String getDegreeWorksText(@RequestParam String username,
           @RequestParam String password,
           @RequestParam(value = "analytics", required = false, defaultValue = "true") boolean sendAnalytics) {
     Analytics analytics = new Analytics();
+    String degreeWorksText;
 
     Instant startTime = Instant.now();
     AutomationService automationService = new AutomationService(username, password);
@@ -30,7 +30,7 @@ public class Endpoint {
     analytics.timeToInstantiate = Duration.between(startTime, endTime).toMillis();
 
     startTime = Instant.now();
-    automationService.getDegreeWorksText();
+    degreeWorksText = automationService.getText();
     endTime = Instant.now();
     analytics.timeToExecute = Duration.between(startTime, endTime).toMillis();
 
@@ -42,7 +42,7 @@ public class Endpoint {
       logger.trace("Skipping analytics");
     }
 
-    return automationService.automationResponse;
+    return degreeWorksText;
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/healthcheck")

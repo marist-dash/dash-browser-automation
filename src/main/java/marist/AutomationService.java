@@ -15,7 +15,6 @@ public class AutomationService {
   private String username;
   private String password;
   RemoteWebDriver driver;
-  public AutomationResponse automationResponse;
   private final Logger logger = LoggerFactory.getLogger(AutomationService.class);
 
   public AutomationService(String username, String password) {
@@ -26,10 +25,9 @@ public class AutomationService {
     } catch (MalformedURLException ex) {
       logger.warn("Unable to instantiate Selenium remote web driver", ex);
     }
-    this.automationResponse = new AutomationResponse();
   }
 
-  public void getDegreeWorksText() {
+  public String getText() {
     this.driver.get(DEGREEWORKS_URL);
 
     // authN
@@ -42,13 +40,13 @@ public class AutomationService {
     // navigate to correct <frame>
     driver.switchTo().frame("frBodyContainer");
     driver.switchTo().frame("frBody");
-    this.automationResponse.degreeWorksText = driver.findElement(By.tagName("html")).getText();
-    driver.quit();
-  }
+    String degreeWorksText = driver.findElement(By.tagName("html")).getText();
 
-  public class AutomationResponse {
-
-    public String degreeWorksText;
+    // close browser asynchronously
+    new Thread(() -> {
+      driver.quit();
+    }).start();
+    return degreeWorksText;
   }
 
 }
