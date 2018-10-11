@@ -35,9 +35,11 @@ public class Endpoint {
     analytics.timeToExecute = Duration.between(startTime, endTime).toMillis();
 
     if (sendAnalytics) {
-      logger.trace("Sending analytics");
       // asynchronously send analytics
-      analytics.send();
+      new Thread(() -> {
+        logger.trace("Sending analytics");
+        analytics.send();
+      }).start();
     } else {
       logger.trace("Skipping analytics");
     }
