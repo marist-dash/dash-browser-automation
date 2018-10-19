@@ -25,17 +25,22 @@ public class Endpoint {
           @RequestParam(value = "analytics", required = false, defaultValue = "true") boolean sendAnalytics) {
     Analytics analytics = new Analytics();
 
+    // Instantiate WebDriver and track time
     Instant startTime = Instant.now();
     AutomationService automationService = new AutomationService(username, password);
     Instant endTime = Instant.now();
     analytics.timeToInstantiate = Duration.between(startTime, endTime).toMillis();
 
+    // fetch DegreeWorks text and track time
     startTime = Instant.now();
+    automationService.getDegreeWorksText();
+    endTime = Instant.now();
+    analytics.timeToExecute = Duration.between(startTime, endTime).toMillis();
+
+    // return 401 if CAS failed
     if (automationService.degreeWorksText == null) {
       return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
-    endTime = Instant.now();
-    analytics.timeToExecute = Duration.between(startTime, endTime).toMillis();
 
     if (sendAnalytics) {
       // asynchronously send analytics
@@ -49,7 +54,6 @@ public class Endpoint {
 
     return new ResponseEntity(automationService.degreeWorksText, HttpStatus.OK);
   }
-    
 
   @RequestMapping(method = RequestMethod.GET, value = "/healthcheck")
   public String doHealthCheck() {

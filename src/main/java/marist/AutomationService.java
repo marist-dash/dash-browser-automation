@@ -16,20 +16,20 @@ public class AutomationService {
   private String username;
   private String password;
   RemoteWebDriver driver;
-  private final Logger logger = LoggerFactory.getLogger(AutomationService.class);
+
+  static final Logger logger = LoggerFactory.getLogger(AutomationService.class);
 
   public AutomationService(String username, String password) {
     this.username = username;
     this.password = password;
     try {
-      this.driver = new RemoteWebDriver(new URL("http://chrome:4444/wd/hub"), DesiredCapabilities.chrome());
+      this.driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), DesiredCapabilities.chrome());
     } catch (MalformedURLException ex) {
       logger.warn("Unable to instantiate Selenium remote web driver", ex);
     }
-    setText();
   }
 
-  private void setText() {
+  public String getDegreeWorksText() {
     this.driver.get(DEGREEWORKS_URL);
 
     // authN
@@ -41,7 +41,6 @@ public class AutomationService {
 
     // check for invalid credentials
     if (driver.getTitle().equals("Marist Authentication Service")) {
-      // throw 401
       this.degreeWorksText = null;
     } else {
       // navigate to correct <frame>
@@ -54,6 +53,7 @@ public class AutomationService {
     new Thread(() -> {
       driver.quit();
     }).start();
+    return this.degreeWorksText;
   }
 
 }
