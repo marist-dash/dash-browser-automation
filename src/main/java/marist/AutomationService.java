@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 public class AutomationService {
 
+  public String degreeWorksText;
   private String DEGREEWORKS_URL = "https://degreeworks.banner.marist.edu/dashboard/dashboard";
   private String username;
   private String password;
@@ -25,9 +26,10 @@ public class AutomationService {
     } catch (MalformedURLException ex) {
       logger.warn("Unable to instantiate Selenium remote web driver", ex);
     }
+    setText();
   }
 
-  public String getText() {
+  private void setText() {
     this.driver.get(DEGREEWORKS_URL);
 
     // authN
@@ -37,16 +39,21 @@ public class AutomationService {
     passwordDiv.sendKeys(password);
     passwordDiv.submit();
 
-    // navigate to correct <frame>
-    driver.switchTo().frame("frBodyContainer");
-    driver.switchTo().frame("frBody");
-    String degreeWorksText = driver.findElement(By.tagName("html")).getText();
+    // check for invalid credentials
+    if (driver.getTitle().equals("Marist Authentication Service")) {
+      // throw 401
+      this.degreeWorksText = null;
+    } else {
+      // navigate to correct <frame>
+      driver.switchTo().frame("frBodyContainer");
+      driver.switchTo().frame("frBody");
+      this.degreeWorksText = driver.findElement(By.tagName("html")).getText();
+    }
 
     // close browser asynchronously
     new Thread(() -> {
       driver.quit();
     }).start();
-    return degreeWorksText;
   }
 
 }
