@@ -17,13 +17,13 @@ public class AutomationService {
   private String password;
   RemoteWebDriver driver;
 
-  static final Logger logger = LoggerFactory.getLogger(AutomationService.class);
+  Logger logger = LoggerFactory.getLogger(AutomationService.class);
 
   public AutomationService(String username, String password) {
     this.username = username;
     this.password = password;
     try {
-      this.driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), DesiredCapabilities.chrome());
+      this.driver = new RemoteWebDriver(new URL("http://chrome:4444/wd/hub"), DesiredCapabilities.chrome());
     } catch (MalformedURLException ex) {
       logger.warn("Unable to instantiate Selenium remote web driver", ex);
     }

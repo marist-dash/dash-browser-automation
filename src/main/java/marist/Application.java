@@ -15,20 +15,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 @SpringBootApplication
-public class Application {
+public class Application implements AsyncConfigurer {
 
   public static String POSTGRES_USER;
   public static String POSTGRES_PASSWORD;
   public static String POSTGRES_DB;
   public static String POSTGRES_ANALYTICS_TABLE;
   public static Connection CONNECTION;
-  static final Logger logger = LoggerFactory.getLogger(Application.class);
+  static Logger logger = LoggerFactory.getLogger(Application.class);
 
   public static void main(String[] args) {
     SpringApplication.run(Application.class, args);
@@ -36,13 +37,13 @@ public class Application {
     connectToDatabase();
   }
 
-  @Bean
+  @Bean(name = "asyncExecutor")
   public Executor asyncExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
     executor.setCorePoolSize(2);
     executor.setMaxPoolSize(2);
-    executor.setQueueCapacity(500);
-    executor.setThreadNamePrefix("SendAnalytics--");
+    executor.setQueueCapacity(100);
+    executor.setThreadNamePrefix("AsyncSendAnalytics--");
     executor.initialize();
     return executor;
   }
@@ -81,12 +82,12 @@ public class Application {
       logger.warn("Unable to find Postgres driver", ex);
     }
 
-    String DB_URL = "jdbc:postgresql://db:5432/" + POSTGRES_DB;
+    String DB_URL = "jdbc:postgresql://maristdash.tk:5432/" + POSTGRES_DB;
     try {
-      CONNECTION = DriverManager.getConnection(DB_URL,
-              POSTGRES_USER, POSTGRES_PASSWORD);
+      CONNECTION = DriverManager.getConnection(DB_URL, POSTGRES_USER, POSTGRES_PASSWORD);
     } catch (SQLException ex) {
       logger.warn("Unable to connect to database", ex);
     }
   }
+
 }

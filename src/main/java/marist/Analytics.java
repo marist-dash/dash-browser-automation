@@ -11,15 +11,17 @@ public class Analytics {
 
   public long timeToInstantiate;
   public long timeToExecute;
-  private final Logger logger = LoggerFactory.getLogger(Analytics.class);
+  public String degreeWorksText;
 
-  @Async
+  Logger logger = LoggerFactory.getLogger(Analytics.class);
+
+  @Async("asyncExecutor")
   public void send() {
     // build the SQL query
     StringBuilder queryBuilder = new StringBuilder();
     queryBuilder.append("INSERT INTO ")
             .append(Application.POSTGRES_ANALYTICS_TABLE)
-            .append(" (instantiate_time, execute_time, timestamp) VALUES(?, ?, ?);");
+            .append(" (instantiate_time, execute_time, timestamp, degree_works_text) VALUES(?, ?, ?, ?);");
     String query = queryBuilder.toString();
 
     // execute insert
@@ -28,6 +30,7 @@ public class Analytics {
       statement.setLong(1, timeToInstantiate);
       statement.setLong(2, timeToExecute);
       statement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+      statement.setString(4, degreeWorksText);
       statement.executeUpdate();
       statement.close();
     } catch (SQLException ex) {

@@ -7,31 +7,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Component
 @RestController
 public class Endpoint {
 
-  private final Logger logger = LoggerFactory.getLogger(Endpoint.class);
+  Logger logger = LoggerFactory.getLogger(Endpoint.class);
 
   @RequestMapping(method = RequestMethod.POST, value = "/")
   public ResponseEntity getDegreeWorksText(@RequestParam String username,
           @RequestParam String password,
           @RequestParam(value = "analytics", required = false, defaultValue = "true") boolean sendAnalytics) {
+
     Analytics analytics = new Analytics();
 
-    // Instantiate WebDriver and track time
+    // Instantiate WebDriver
     Instant startTime = Instant.now();
     AutomationService automationService = new AutomationService(username, password);
     Instant endTime = Instant.now();
     analytics.timeToInstantiate = Duration.between(startTime, endTime).toMillis();
 
-    // fetch DegreeWorks text and track time
+    // fetch DegreeWorks text
     startTime = Instant.now();
     automationService.getDegreeWorksText();
     endTime = Instant.now();
@@ -39,17 +38,15 @@ public class Endpoint {
 
     // return 401 if CAS failed
     if (automationService.degreeWorksText == null) {
-      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+      return new ResponseEntity<>("Invalid Marist credentials", HttpStatus.UNAUTHORIZED);
     }
 
     if (sendAnalytics) {
       // asynchronously send analytics
       new Thread(() -> {
-        logger.trace("Sending analytics");
+        analytics.degreeWorksText = automationService.degreeWorksText;
         analytics.send();
       }).start();
-    } else {
-      logger.trace("Skipping analytics");
     }
 
     return new ResponseEntity(automationService.degreeWorksText, HttpStatus.OK);
