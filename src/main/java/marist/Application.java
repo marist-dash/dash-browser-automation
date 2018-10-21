@@ -3,9 +3,6 @@ package marist;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Properties;
@@ -24,17 +21,17 @@ import org.springframework.web.filter.CorsFilter;
 @SpringBootApplication
 public class Application implements AsyncConfigurer {
 
+  public static String POSTGRES_URL;
   public static String POSTGRES_USER;
   public static String POSTGRES_PASSWORD;
   public static String POSTGRES_DB;
   public static String POSTGRES_ANALYTICS_TABLE;
-  public static Connection CONNECTION;
+  public static String POSTGRES_REPORTS_TABLE;
   static Logger logger = LoggerFactory.getLogger(Application.class);
 
   public static void main(String[] args) {
     SpringApplication.run(Application.class, args);
     loadConfigs();
-    connectToDatabase();
   }
 
   @Bean(name = "asyncExecutor")
@@ -66,28 +63,15 @@ public class Application implements AsyncConfigurer {
     try {
       inputStream = new FileInputStream("db-configs.properties");
       properties.load(inputStream);
+      POSTGRES_URL = properties.getProperty("POSTGRES_URL");
       POSTGRES_USER = properties.getProperty("POSTGRES_USER");
       POSTGRES_PASSWORD = properties.getProperty("POSTGRES_PASSWORD");
       POSTGRES_DB = properties.getProperty("POSTGRES_DB");
       POSTGRES_ANALYTICS_TABLE = properties.getProperty("POSTGRES_ANALYTICS_TABLE");
+      POSTGRES_REPORTS_TABLE = properties.getProperty("POSTGRES_REPORT_TABLE");
+      
     } catch (IOException ex) {
       logger.warn("Unable to load database properties for analytics", ex);
     }
   }
-
-  private static void connectToDatabase() {
-    try {
-      Class.forName("org.postgresql.Driver");
-    } catch (ClassNotFoundException ex) {
-      logger.warn("Unable to find Postgres driver", ex);
-    }
-
-    String DB_URL = "jdbc:postgresql://maristdash.tk:5432/" + POSTGRES_DB;
-    try {
-      CONNECTION = DriverManager.getConnection(DB_URL, POSTGRES_USER, POSTGRES_PASSWORD);
-    } catch (SQLException ex) {
-      logger.warn("Unable to connect to database", ex);
-    }
-  }
-
 }

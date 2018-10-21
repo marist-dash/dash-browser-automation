@@ -11,30 +11,29 @@ public class Analytics {
 
   public long timeToInstantiate;
   public long timeToExecute;
-  public String degreeWorksText;
 
   Logger logger = LoggerFactory.getLogger(Analytics.class);
 
   @Async("asyncExecutor")
   public void send() {
-    // build the SQL query
+    // build SQL query
     StringBuilder queryBuilder = new StringBuilder();
     queryBuilder.append("INSERT INTO ")
             .append(Application.POSTGRES_ANALYTICS_TABLE)
-            .append(" (instantiate_time, execute_time, timestamp, degree_works_text) VALUES(?, ?, ?, ?);");
+            .append(" (instantiate_time, execute_time, timestamp) VALUES(?, ?, ?);");
     String query = queryBuilder.toString();
 
-    // execute insert
-    try {
-      PreparedStatement statement = Application.CONNECTION.prepareStatement(query);
+    // create new database connection
+    DatabaseConnection postgres = new DatabaseConnection();
+
+    // insert WebDriver analytics into database
+    try (PreparedStatement statement = postgres.connection.prepareCall(query)) {
       statement.setLong(1, timeToInstantiate);
       statement.setLong(2, timeToExecute);
       statement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-      statement.setString(4, degreeWorksText);
       statement.executeUpdate();
-      statement.close();
     } catch (SQLException ex) {
-      logger.info("SQL error", ex);
+      logger.warn("SQL error when adding analytics", ex);
     }
   }
 

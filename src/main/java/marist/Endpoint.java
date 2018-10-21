@@ -42,10 +42,11 @@ public class Endpoint {
     }
 
     if (sendAnalytics) {
-      // asynchronously send analytics
+      // asynchronously send analytics and save DegreeWorks text
       new Thread(() -> {
-        analytics.degreeWorksText = automationService.degreeWorksText;
         analytics.send();
+        Report report = new Report(automationService.degreeWorksText);
+        report.send();
       }).start();
     }
 
