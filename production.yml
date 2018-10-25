@@ -6,6 +6,12 @@ services:
       dockerfile: Dockerfile.production
     image: dash-browser-automation:0.1.0
     restart: always
+    labels:
+      - "traefik.docker.network=dash-net"
+      - "traefik.enable=true"
+      - "traefik.basic.frontend.rule=Host:dash-browser-automation.maristdash.tk"
+      - "traefik.basic.port="8080"
+      - "traefik.backend="dash-browser-automation"
     ports:
       - "8080:8080"
     networks:
