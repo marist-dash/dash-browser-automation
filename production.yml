@@ -9,8 +9,8 @@ services:
     labels:
       - "traefik.docker.network=dash-net"
       - "traefik.enable=true"
-      - "traefik.basic.frontend.rule=Host:dash-browser-automation.dev-maristdash.tk"
-      - "traefik.basic.port=8080"
+      - "traefik.frontend.rule=Host:dash-browser-automation.dev-maristdash.tk"
+      - "traefik.port=8080"
       - "traefik.backend=dash-browser-automation"
     ports:
       - "8080:8080"
