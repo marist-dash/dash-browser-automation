@@ -1,6 +1,6 @@
 version: '3'
 services:
-  browser-automation:
+  dash-browser-automation:
     build:
       context: .
       dockerfile: Dockerfile.production
@@ -9,7 +9,7 @@ services:
     labels:
       - "traefik.docker.network=dash-net"
       - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:dash-browser-automation.dev-maristdash.tk"
+      - "traefik.frontend.rule=Host:dash-browser-automation.speedegree.tk"
       - "traefik.port=8080"
       - "traefik.backend=dash-browser-automation"
     ports:
